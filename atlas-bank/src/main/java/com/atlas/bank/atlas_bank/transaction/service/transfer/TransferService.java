@@ -2,6 +2,7 @@ package com.atlas.bank.atlas_bank.transaction.service.transfer;
 
 import com.atlas.bank.atlas_bank.account.exception.AccountNotFoundException;
 import com.atlas.bank.atlas_bank.account.model.Account;
+import com.atlas.bank.atlas_bank.account.model.AccountStatus;
 import com.atlas.bank.atlas_bank.transaction.exception.AccountNotActiveException;
 import com.atlas.bank.atlas_bank.transaction.exception.InsufficientFundsException;
 import com.atlas.bank.atlas_bank.transaction.model.Transaction;
@@ -45,7 +46,7 @@ public class TransferService extends TransactionProcessor<TransferContext> imple
         Transaction transaction = process(new TransferContext(from, to, amount));
         eventPublisher.publishEvent(new TransactionExecutedEvent(
                 transaction.getId(),
-                transaction.getType(),
+                transaction.getType().name(),
                 transaction.getSourceAccountId(),
                 transaction.getTargetAccountId(),
                 transaction.getAmount(),
@@ -57,11 +58,11 @@ public class TransferService extends TransactionProcessor<TransferContext> imple
     @Override
     protected void validate(TransferContext context) {
         // Validar que la cuenta esté activa
-        if (!"ACTIVE".equals(context.from().getStatus())) {
-            throw new AccountNotActiveException(context.from().getId(), context.from().getStatus());
+        if (context.from().getStatus() != AccountStatus.ACTIVE) {
+            throw new AccountNotActiveException(context.from().getId(), context.from().getStatus().name());
         }
-        if (!"ACTIVE".equals(context.to().getStatus())) {
-            throw new AccountNotActiveException(context.to().getId(), context.to().getStatus());
+        if (context.to().getStatus() != AccountStatus.ACTIVE) {
+            throw new AccountNotActiveException(context.to().getId(), context.to().getStatus().name());
         }
         // Validar fondos
         if (context.from().getBalance().compareTo(context.amount()) < 0) {
