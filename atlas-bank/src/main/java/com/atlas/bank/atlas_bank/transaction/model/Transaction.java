@@ -15,6 +15,7 @@ import static com.atlas.bank.atlas_bank.transaction.model.TransactionStatus.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Transaction {
 
     @Id
