@@ -45,6 +45,11 @@ public class TransferService extends TransactionProcessor<TransferContext> imple
         Account to = accountRepository.findById(toId)
                 .orElseThrow(() -> new AccountNotFoundException(toId));
         Transaction transaction = process(new TransferContext(from, to, amount));
+
+        transaction.advanceTo(transaction.getState().validate());
+        transaction.advanceTo(transaction.getState().execute());
+        transactionRepository.save(transaction);
+
         eventPublisher.publishEvent(new TransactionExecutedEvent(
                 transaction.getId(),
                 transaction.getType().name(),
